@@ -1,0 +1,98 @@
+import { NextResponse } from "next/server";
+import { getDailyRevealForProfile, getDailyQuestions } from "@/lib/supabase/queries/daily";
+import { resolveCurrentDayNumber, getQuestionForDay } from "@/lib/dailyReveal";
+import { createServerSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/server";
+import {
+  EMPTY_DAILY_RESPONSE,
+  isMissingTableError,
+  profileExists,
+} from "@/lib/supabase/emptyBundles";
+import { DEMO_QUESTION } from "@/lib/revealConstants";
+
+const MOCK_QUESTION = {
+  day_number: 1,
+  scheduled_date: "2026-07-30",
+  weekday: "Thursday",
+  question_type: "song",
+  answer_type: "song",
+  question_text: DEMO_QUESTION,
+  original_number: 1,
+};
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const profileId = searchParams.get("profile")?.trim().toLowerCase();
+  if (!profileId) {
+    return NextResponse.json({ error: "Missing query param: profile" }, { status: 400 });
+  }
+
+  // Local / Vercel mock without Supabase — keep Home usable for demos
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({
+      profileId,
+      ...EMPTY_DAILY_RESPONSE,
+      currentDayNumber: 1,
+      currentQuestion: MOCK_QUESTION,
+      meta: { trailCount: 0, empty: true, mock: true },
+    });
+  }
+
+  try {
+    const supabase = createServerSupabaseClient();
+
+    if (!(await profileExists(supabase, profileId))) {
+      return NextResponse.json({ error: `Profile not found: ${profileId}` }, { status: 404 });
+    }
+
+    try {
+      const bundle = await getDailyRevealForProfile(supabase, profileId);
+      if (!bundle) {
+        const questions = await getDailyQuestions(supabase);
+        let currentDayNumber = null;
+        let currentQuestion = null;
+        if (questions.length > 0) {
+          currentDayNumber = resolveCurrentDayNumber(questions);
+          currentQuestion = getQuestionForDay(questions, currentDayNumber);
+        } else {
+          currentDayNumber = 1;
+          currentQuestion = MOCK_QUESTION;
+        }
+
+        return NextResponse.json({
+          profileId,
+          ...EMPTY_DAILY_RESPONSE,
+          currentDayNumber,
+          currentQuestion,
+          meta: { trailCount: 0, empty: true },
+        });
+      }
+
+      return NextResponse.json({
+        profileId,
+        currentDayNumber: bundle.currentDayNumber,
+        currentQuestion: bundle.currentQuestion,
+        currentAnswer: bundle.currentAnswer,
+        answerTrail: bundle.answerTrail,
+        meta: {
+          trailCount: bundle.answerTrail.length,
+          windowStart: "2026-05-08",
+          windowEnd: "2026-06-04",
+        },
+      });
+    } catch (err) {
+      if (isMissingTableError(err)) {
+        return NextResponse.json({
+          profileId,
+          ...EMPTY_DAILY_RESPONSE,
+          currentDayNumber: 1,
+          currentQuestion: MOCK_QUESTION,
+          meta: { trailCount: 0, empty: true },
+        });
+      }
+      throw err;
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}

@@ -1,25 +1,34 @@
-/* Demo view tailored for Cole (Events & Profile only) */
+/* Cole-only demo — Events only, locked to Cole Brennan (GPB admin). */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IOSDevice } from "@/components/IOSDevice";
-import { BottomNav, type NavId } from "@/components/BottomNav";
 import { EventsScreen } from "@/components/EventsScreen";
-import { ProfileV2Provider, ProfileV2Shell } from "@/components/profile/ProfileScreen";
-import { ProfileGateProvider } from "@/lib/profileGate";
-import { Icon } from "@/components/Primitives";
+
+const COLE_ID = "cole";
+
+function lockColeProfile() {
+  try {
+    const raw = window.localStorage.getItem("ligo:active_user");
+    if (raw === JSON.stringify(COLE_ID)) return;
+    window.localStorage.setItem("ligo:active_user", JSON.stringify(COLE_ID));
+    window.dispatchEvent(
+      new CustomEvent("ligo:storage", {
+        detail: { key: "ligo:active_user", newValue: COLE_ID },
+      })
+    );
+  } catch {
+    /* ignore */
+  }
+}
 
 export default function ColeDemo() {
-  const [nav, setNav] = useState<NavId>("profile");
+  const [ready, setReady] = useState(false);
 
-  const isEvents = nav === "events";
-  const isProfile = nav === "profile";
-
-  // Only show Events and Profile tabs
-  const DEMO_TABS = [
-    { id: "events" as NavId, label: "Events", icon: Icon.Calendar },
-    { id: "profile" as NavId, label: "Profile", icon: Icon.User },
-  ];
+  useEffect(() => {
+    lockColeProfile();
+    setReady(true);
+  }, []);
 
   return (
     <main
@@ -56,7 +65,7 @@ export default function ColeDemo() {
             background: "rgba(255,255,255,0.25)",
           }}
         />
-        Demo: Cole
+        Demo · Cole · GPB admin
       </div>
 
       <IOSDevice width={402} height={874} dark={false}>
@@ -70,22 +79,25 @@ export default function ColeDemo() {
             overflow: "hidden",
           }}
         >
-          {isEvents ? (
-            <>
-              <div className="ligo-events" style={{ position: "absolute", inset: 0 }}>
-                <EventsScreen onTab={setNav} overrideUserId="cole" />
-              </div>
-              <BottomNav active="events" onChange={setNav} items={DEMO_TABS} />
-            </>
+          {!ready ? (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "rgba(20,17,13,0.4)",
+                fontSize: 14,
+                fontWeight: 500,
+              }}
+            >
+              Loading…
+            </div>
           ) : (
-            <>
-              <ProfileGateProvider>
-                <ProfileV2Provider overrideUserId="cole">
-                  <ProfileV2Shell />
-                </ProfileV2Provider>
-              </ProfileGateProvider>
-              <BottomNav active="profile" onChange={setNav} items={DEMO_TABS} />
-            </>
+            <div className="ligo-events" style={{ position: "absolute", inset: 0 }}>
+              <EventsScreen overrideUserId={COLE_ID} siloMode />
+            </div>
           )}
         </div>
       </IOSDevice>
@@ -101,7 +113,9 @@ export default function ColeDemo() {
           lineHeight: 1.5,
         }}
       >
-        You are viewing the dedicated demo environment for Cole Brennan (GPB & SigEp).
+        Locked to <strong style={{ color: "rgba(255,255,255,0.55)" }}>Cole Brennan</strong> — Georgetown Program Board admin.
+        <br />
+        Use Manage to create events, invite members, and run event ops.
       </div>
     </main>
   );

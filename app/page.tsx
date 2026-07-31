@@ -96,7 +96,7 @@ export default function ColeDemo() {
             </div>
           ) : (
             <div className="ligo-events" style={{ position: "absolute", inset: 0 }}>
-              <EventsScreen overrideUserId={COLE_ID} siloMode />
+              <EventsScreen overrideUserId={COLE_ID} />
             </div>
           )}
         </div>

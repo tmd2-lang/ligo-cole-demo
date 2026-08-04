@@ -51,7 +51,7 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
   // Keep mock data as-is for Charlotte to see the new fixture events
   const dynamicInitialEvents = INITIAL_EVENTS;
 
-  const [events, setEvents] = usePersistentState<EventItem[]>('ligo:all_events_v4', dynamicInitialEvents);
+  const [events, setEvents] = usePersistentState<EventItem[]>('ligo:all_events_v6', dynamicInitialEvents);
   const [rsvpStore, setRsvpStore] = usePersistentState<UserRsvpStore>('ligo:user_rsvps_v1', {});
   const [view, setView] = useState<EventsView>("main");
   const [mainTab, setMainTab] = useState<MainTab>('home');

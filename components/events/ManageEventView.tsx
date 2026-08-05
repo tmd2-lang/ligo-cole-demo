@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { EventItem } from '../../lib/mockEventsData';
 import { EVI } from './Icons';
 import { EventGroupChat, seedEventThread } from './EventGroupChat';
+import { getEventGuests, type EventGuest } from '../../lib/eventGuests';
 
 function blastAutofill(event: EventItem) {
   if (event.name?.toLowerCase().includes('kickoff')) {
@@ -43,12 +44,20 @@ export function ManageEventView({
   const [blastText, setBlastText] = useState('');
   const [chatOpen, setChatOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [guestFilter, setGuestFilter] = useState<EventGuest['status'] | null>(null);
   const description = eventDescription(event);
 
   const pending = event.pendingCount || 0;
   const declined = event.declinedCount || 0;
   const isMembersOnly = event.visibility === 'members_only';
   const lastMsg = seedEventThread(event, currentUserId).slice(-1)[0];
+
+  const guests = useMemo(() => getEventGuests(event), [event]);
+  const shownGuests = guestFilter ? guests.filter(g => g.status === guestFilter) : [];
+  const guestHeading =
+    guestFilter === 'going' ? 'Going'
+    : guestFilter === 'pending' ? 'Haven’t responded'
+    : 'Declined';
 
   return (
     <div className="screen-fade" style={{ background: 'var(--ligo-paper)', minHeight: '100%', position: 'absolute', inset: 0, zIndex: 20, overflowY: 'auto' }}>
@@ -70,19 +79,33 @@ export function ManageEventView({
       <div style={{ padding: '0 20px' }}>
         <div style={{ marginTop: 32, marginBottom: 36 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
-            <div>
-              <div style={{ fontSize: 40, fontWeight: 500, fontFamily: 'var(--font-display)', color: 'var(--ink)', lineHeight: 1, marginBottom: 8 }}>{event.goingCount}</div>
-              <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.6)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Going</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 40, fontWeight: 500, fontFamily: 'var(--font-display)', color: 'rgba(20,17,13,0.25)', lineHeight: 1, marginBottom: 8 }}>{pending}</div>
-              <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.6)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pending</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 40, fontWeight: 500, fontFamily: 'var(--font-display)', color: 'rgba(20,17,13,0.25)', lineHeight: 1, marginBottom: 8 }}>{declined}</div>
-              <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.6)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Declined</div>
-            </div>
+            {([
+              { key: 'going' as const, count: event.goingCount || 0, label: 'Going', strong: true },
+              { key: 'pending' as const, count: pending, label: 'Pending', strong: false },
+              { key: 'declined' as const, count: declined, label: 'Declined', strong: false },
+            ]).map(stat => (
+              <button
+                key={stat.key}
+                onClick={() => stat.count > 0 && setGuestFilter(stat.key)}
+                disabled={stat.count === 0}
+                style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', cursor: stat.count > 0 ? 'pointer' : 'default' }}
+              >
+                <div style={{ fontSize: 40, fontWeight: 500, fontFamily: 'var(--font-display)', color: stat.strong ? 'var(--ink)' : 'rgba(20,17,13,0.25)', lineHeight: 1, marginBottom: 8 }}>{stat.count}</div>
+                <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.6)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  {stat.label}
+                  {stat.count > 0 && <EVI.Chevron style={{ width: 10, height: 10, opacity: 0.4, transform: 'rotate(-90deg)' }} />}
+                </div>
+              </button>
+            ))}
           </div>
+          {pending > 0 && (
+            <button
+              onClick={() => setGuestFilter('pending')}
+              style={{ marginTop: 20, width: '100%', textAlign: 'left', background: 'rgba(20,17,13,0.04)', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 13, fontWeight: 500, color: 'rgba(20,17,13,0.6)', cursor: 'pointer' }}
+            >
+              {pending} {pending === 1 ? 'person hasn’t' : 'people haven’t'} answered yet — see who
+            </button>
+          )}
         </div>
 
         <div style={{ marginBottom: 48 }}>
@@ -210,6 +233,49 @@ export function ManageEventView({
                   Open full event page
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {guestFilter && (
+        <div className="sheet-backdrop" style={{ position: 'absolute', inset: 0, background: 'rgba(20,17,13,0.4)', zIndex: 56, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div className="sheet-content screen-fade" style={{ background: 'var(--ligo-paper)', height: '85%', borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px 20px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--ink)', flexShrink: 0 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(20,17,13,0.4)' }}>
+                  {guestHeading}
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 500, fontFamily: 'var(--font-display)', textTransform: 'uppercase', lineHeight: 1.1, marginTop: 4 }}>
+                  {shownGuests.length} {shownGuests.length === 1 ? 'person' : 'people'}
+                </div>
+              </div>
+              <button onClick={() => setGuestFilter(null)} style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ink)', cursor: 'pointer' }}>
+                Close
+              </button>
+            </div>
+
+            <div style={{ padding: '12px 20px 0', fontSize: 12, fontWeight: 500, color: 'rgba(20,17,13,0.45)', flexShrink: 0 }}>
+              {shownGuests.filter(g => g.isMember).length} on the roster · {shownGuests.filter(g => !g.isMember).length} not members
+            </div>
+
+            <div style={{ overflowY: 'auto', padding: '20px 20px max(28px, env(safe-area-inset-bottom, 28px))', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {shownGuests.map(g => (
+                <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0, background: g.isMember ? 'var(--ink)' : 'rgba(20,17,13,0.08)', color: g.isMember ? '#fff' : 'rgba(20,17,13,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600 }}>
+                    {g.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)' }}>{g.name}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.5)', fontWeight: 500 }}>{g.detail}</div>
+                  </div>
+                  {!g.isMember && (
+                    <div style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(20,17,13,0.4)', border: '1px dashed rgba(20,17,13,0.2)', borderRadius: 10, padding: '4px 8px', flexShrink: 0 }}>
+                      Guest
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

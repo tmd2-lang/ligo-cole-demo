@@ -34,14 +34,25 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
   const handleNext = () => setStep(s => s + 1);
   
   const finish = (draft = false) => {
+    const isSae = club?.id === 'sae' || name.toLowerCase().includes('sae') || name.toLowerCase().includes('champagne') || name.toLowerCase().includes('formal');
+    const isFormal = name.toLowerCase().includes('formal');
+    const isChampagne = name.toLowerCase().includes('champagne');
+    const eventTags = isFormal 
+      ? ['Greek', 'Formal', 'Brothers + Dates'] 
+      : isChampagne 
+      ? ['Greek', 'Rush', 'Invite Only', 'Smart Casual'] 
+      : isSae 
+      ? ['Greek', 'Social'] 
+      : ['Social'];
+
     onPublish({
       id: 'new-' + Date.now(),
       name: name,
-      host: club.name,
-      hostName: club.name,
-      hostOrganizationId: club.id,
-      hostAvatar: club.initials,
-      hostAvatarColor: club.id === 'program_board' ? '#0050ff' : undefined,
+      host: isSae ? 'Sigma Alpha Epsilon' : club.name,
+      hostName: isSae ? 'Sigma Alpha Epsilon' : club.name,
+      hostOrganizationId: isSae ? 'sae' : club.id,
+      hostAvatar: isSae ? 'SAE' : club.initials,
+      hostAvatarColor: isSae ? '#4B0082' : club.id === 'program_board' ? '#0050ff' : undefined,
       day: date,
       time: endTime ? `${time} – ${endTime}` : time,
       endTime: endTime || undefined,
@@ -51,18 +62,19 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
       flyerUrl: flyerUrl || undefined,
       image: flyerUrl || undefined,
       visibility: mode || 'members_only',
-      inviteOnly: mode === 'invite_only',
+      inviteOnly: mode === 'invite_only' || isChampagne,
       selectedSubgroups: mode === 'members_only' ? selectedSubgroups : undefined,
       selectedGuests: mode === 'invite_only' ? selectedGuests : undefined,
-      color: club.id === 'program_board' ? '#0050ff' : '#f5d783',
+      color: isSae ? '#4B0082' : club.id === 'program_board' ? '#0050ff' : '#f5d783',
       tag: 'Social',
-      tags: ['Social'],
+      tags: eventTags,
       tagBg: '#0a0907',
       tagFg: '#fff',
-      goingCount: 1,
-      pendingCount: 0,
+      goingCount: isChampagne ? 38 : isFormal ? 42 : 1,
+      pendingCount: isChampagne ? 16 : 0,
       currentUserStatus: 'hosting',
       publishStatus: draft ? 'draft' : 'published',
+      organizer: isChampagne ? 'Owen Marchetti — Recruitment Chair' : undefined,
     }, draft);
   };
 
@@ -71,7 +83,13 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
       <div className="sheet-content screen-fade" style={{ background: 'var(--ligo-paper)', height: '90%', borderRadius: '24px 24px 0 0', display: 'flex', flexDirection: 'column' }}>
         
         <div style={{ padding: '24px 20px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--ink)' }}>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ink)', cursor: 'pointer' }}>Cancel</button>
+          {step > 1 ? (
+            <button onClick={() => setStep(s => s - 1)} style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ink)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <EVI.Back style={{ width: 14, height: 14 }} /> Back
+            </button>
+          ) : (
+            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 13, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--ink)', cursor: 'pointer' }}>Cancel</button>
+          )}
           <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(20,17,13,0.4)' }}>
             Step {step} of 3
           </div>
@@ -81,9 +99,9 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
         <div style={{ flex: 1, overflowY: 'auto', padding: '40px 20px' }}>
           {step === 1 && (
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40, flexWrap: 'wrap', gap: 12 }}>
                 <h2 style={{ fontSize: 40, fontWeight: 500, fontFamily: 'var(--font-display)', color: 'var(--ink)', lineHeight: 1, textTransform: 'uppercase', margin: 0 }}>The Basics</h2>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {club.id === 'sigma_phi_epsilon' && (
                     <button 
                       onClick={(e) => {
@@ -118,42 +136,44 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
                       Autofill Concert
                     </button>
                   )}
-                  {club.id === 'program_board' && (
+                  {(club.id === 'sae' || club.id === 'program_board' || !['sigma_phi_epsilon', 'phantoms'].includes(club.id)) && (
                     <>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          setName('GPB Fall Programming Kickoff');
-                          setDate('Thursday, September 10, 2026');
-                          setTime('7:00 PM');
-                          setEndTime('8:30 PM');
-                          setVenue('Leavey Center, Program Room');
-                          setSummary('Join the full Georgetown Program Board for our fall programming kickoff. We’ll walk through the semester calendar, assign initial event teams, review production timelines, and cover expectations for Programming, Marketing, and Production. Dinner will be provided, and all members should arrive ready to choose at least one September or October event to support.');
-                          setFlyerUrl('/Posh/GPB2.png');
+                          setName('SAE Fall Formal');
+                          setDate('Saturday, November 21, 2026');
+                          setTime('8:00 PM');
+                          setEndTime('12:00 AM');
+                          setVenue('Private Venue — Washington, DC');
+                          setSummary('SAE Fall Formal closes out the semester with a night downtown for brothers and their dates. Formal attire required. Transportation and final venue details will be shared with confirmed attendees closer to the event.\n\nPlease RSVP by November 13 so the social committee can finalize transportation and venue numbers. Each brother should RSVP for himself and confirm his date when prompted.');
+                          setFlyerUrl('/Posh/SAEFallFormal.png');
                           setMode('members_only');
-                          const all = club.groups.find(g => g.name === 'All Members');
-                          setSelectedSubgroups(all ? [all.id] : []);
+                          const all = club.groups?.find(g => g.name === 'All Members');
+                          setSelectedSubgroups(all ? [all.id] : ['g-all-sae', 'g-bros-sae']);
                         }}
                         style={{ background: 'rgba(20,17,13,0.05)', color: 'var(--ink)', border: 'none', padding: '8px 16px', borderRadius: 16, fontSize: 11, fontWeight: 500, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                       >
-                        Autofill Kickoff
+                        Autofill Formal (Private)
                       </button>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          setName('Midnight Breakfast');
-                          setDate('Thursday, December 10, 2026');
-                          setTime('10:00 PM');
-                          setEndTime('12:30 AM');
-                          setVenue('Healey Family Student Center Great Room');
-                          setSummary('Take a break from finals and join GPB for Midnight Breakfast at the HFSC. We’ll have pancakes, breakfast sandwiches, coffee, music, games, and giveaways throughout the night. Admission is free for Georgetown students while food lasts.');
-                          setFlyerUrl('/Posh/GPBMidnightBreakfast.png');
-                          setMode('campus');
-                          setSelectedSubgroups([]);
+                          setName('Champagne & Shackles');
+                          setDate('Thursday, September 10, 2026');
+                          setTime('8:00 PM');
+                          setEndTime('11:00 PM');
+                          setVenue('Georgetown Neighborhood — Location Shared with Confirmed Attendees');
+                          setSummary('Join SAE for Champagne & Shackles, one of the chapter’s fall rush events. Meet the brothers, spend the evening with the chapter, and get a better feel for SAE as rush continues.\n\nAttendance is limited to invited prospective members. RSVP through Ligo to confirm your spot and receive the location and final event details before Thursday night.\n\nRSVP Deadline: Thursday, September 10 at 4:00 PM\nArrival Window: 8:00–8:45 PM\nGuest Policy: Invited prospective members only\nLocation: Released to confirmed attendees\nEvent Chat: Open for confirmed attendees and brothers for location updates, questions, and day-of logistics');
+                          setFlyerUrl('/Posh/Champagne&Shackles.png');
+                          setMode('members_only');
+                          const rushGroup = club.groups?.find(g => g.name.includes('Rush') || g.id === 'g-rush-sae');
+                          const brosGroup = club.groups?.find(g => g.name === 'Brothers' || g.id === 'g-bros-sae');
+                          setSelectedSubgroups(rushGroup ? [rushGroup.id, brosGroup?.id || 'g-bros-sae'] : ['g-all-sae']);
                         }}
                         style={{ background: 'rgba(20,17,13,0.05)', color: 'var(--ink)', border: 'none', padding: '8px 16px', borderRadius: 16, fontSize: 11, fontWeight: 500, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                       >
-                        Autofill Breakfast
+                        Autofill Champagne & Shackles (Rush List)
                       </button>
                     </>
                   )}
@@ -234,7 +254,7 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {[
-                  { id: 'members_only', title: 'Members Only', desc: `Only visible to members of ${club.name}.`, icon: <EVI.Lock style={{ width: 20, height: 20 }} /> },
+                  { id: 'members_only', title: 'Members Only', desc: `Only visible to members of ${club.name} or selected subgroups.`, icon: <EVI.Lock style={{ width: 20, height: 20 }} /> },
                   { id: 'campus', title: 'Georgetown', desc: 'Visible on the Explore feed at Georgetown.', icon: <EVI.Globe style={{ width: 20, height: 20 }} /> }
                 ].map(m => (
                   <div key={m.id}>
@@ -282,10 +302,11 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
                         {club.groups.map(g => {
                           const isAllMembers = g.name === 'All Members';
                           const isAlumni = g.name === 'Alumni';
+                          const isRushList = g.name.includes('Rush');
                           const allMembersChecked = selectedSubgroups.includes(club.groups.find(x => x.name === 'All Members')?.id || '');
                           
-                          const isChecked = selectedSubgroups.includes(g.id) || (allMembersChecked && !isAllMembers && !isAlumni);
-                          const isDisabled = allMembersChecked && !isAllMembers && !isAlumni;
+                          const isChecked = selectedSubgroups.includes(g.id) || (allMembersChecked && !isAllMembers && !isAlumni && !isRushList);
+                          const isDisabled = allMembersChecked && !isAllMembers && !isAlumni && !isRushList;
 
                           return (
                             <label key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', cursor: isDisabled ? 'default' : 'pointer', opacity: isDisabled ? 0.5 : 1 }}>
@@ -296,7 +317,7 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
                                 onChange={() => {
                                   if (isAllMembers) {
                                     if (allMembersChecked) {
-                                      setSelectedSubgroups(prev => prev.filter(id => id === club.groups.find(x => x.name === 'Alumni')?.id));
+                                      setSelectedSubgroups(prev => prev.filter(id => id === club.groups.find(x => x.name === 'Alumni')?.id || id === club.groups.find(x => x.name.includes('Rush'))?.id));
                                     } else {
                                       setSelectedSubgroups(prev => [...prev, g.id]);
                                     }
@@ -310,7 +331,14 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
                                 }}
                                 style={{ width: 20, height: 20, accentColor: 'var(--ink)' }}
                               />
-                              <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)' }}>{g.name} ({g.memberCount})</span>
+                              <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {g.name} ({g.memberCount})
+                                {isRushList && (
+                                  <span style={{ fontSize: 10, fontWeight: 600, background: 'rgba(249,115,22,0.15)', color: 'var(--orange)', padding: '2px 8px', borderRadius: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                                    Prospects
+                                  </span>
+                                )}
+                              </span>
                             </label>
                           );
                         })}
@@ -318,18 +346,21 @@ export function CreateEventSheet({ club, onClose, onPublish, currentUserId }: { 
                           {(() => {
                             const allMembers = club.groups.find(g => g.name === 'All Members');
                             const alumni = club.groups.find(g => g.name === 'Alumni');
+                            const rushList = club.groups.find(g => g.name.includes('Rush'));
                             const allMembersChecked = allMembers && selectedSubgroups.includes(allMembers.id);
                             const alumniChecked = alumni && selectedSubgroups.includes(alumni.id);
+                            const rushListChecked = rushList && selectedSubgroups.includes(rushList.id);
                             
                             let count = 0;
                             if (allMembersChecked) {
                               count += allMembers.memberCount;
                             } else {
-                              count += club.groups.filter(g => g.name !== 'All Members' && g.name !== 'Alumni' && selectedSubgroups.includes(g.id)).reduce((acc, g) => acc + g.memberCount, 0);
+                              count += club.groups.filter(g => g.name !== 'All Members' && g.name !== 'Alumni' && !g.name.includes('Rush') && selectedSubgroups.includes(g.id)).reduce((acc, g) => acc + g.memberCount, 0);
                             }
                             if (alumniChecked && alumni) count += alumni.memberCount;
+                            if (rushListChecked && rushList) count += rushList.memberCount;
                             
-                            return `Invites ${count} members · hidden from everyone else.`;
+                            return `Invites ${count} people · hidden from Explore feed.`;
                           })()}
                         </div>
                       </div>

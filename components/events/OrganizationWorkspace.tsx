@@ -292,8 +292,11 @@ export function OrganizationWorkspace({
                     <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)' }}>Create event</div>
                   </button>
                   <button onClick={onInviteMembers} style={{ padding: 16, background: '#fff', borderRadius: 16, border: '1px solid rgba(20,17,13,0.06)', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ color: 'var(--ink)' }}><EVI.Invite /></div>
-                    <div style={{ fontSize: 15, fontWeight: 500, color: 'var(--ink)' }}>Invite members</div>
+                    <div style={{ color: 'var(--orange)' }}><EVI.Invite /></div>
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--ink)' }}>Upload CSV / Roster</div>
+                      <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.5)', marginTop: 2 }}>Import tabling lists & invite members</div>
+                    </div>
                   </button>
                   <button style={{ padding: 16, background: '#fff', borderRadius: 16, border: '1px solid rgba(20,17,13,0.06)', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16 }}>
                     <div style={{ color: 'var(--ink)' }}><EVI.Share /></div>
@@ -366,8 +369,33 @@ export function OrganizationWorkspace({
         {tab === 'members' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 16, borderBottom: '2px solid var(--ink)', marginBottom: 24 }}>
-              <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)' }}>All Members</div>
-              <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)' }}>{org.memberCount}</div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)' }}>All Members</div>
+                <div style={{ fontSize: 12, color: 'rgba(20,17,13,0.5)', marginTop: 2 }}>{org.memberCount} active roster</div>
+              </div>
+              {isOrganizer && (
+                <button
+                  onClick={onInviteMembers}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '8px 14px',
+                    borderRadius: 20,
+                    background: 'var(--ink)',
+                    color: '#fff',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <EVI.Paperclip style={{ width: 13, height: 13 }} />
+                  <span>Upload CSV</span>
+                </button>
+              )}
             </div>
 
             {org.id === 'sigma_phi_epsilon' ? (

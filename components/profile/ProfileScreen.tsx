@@ -820,7 +820,7 @@ function ProfileTabV2() {
   
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
   const [clubView, setClubView] = useState<'home' | 'ops'>('home');
-  const [events, setEvents] = usePersistentState('ligo:all_events_v2', INITIAL_EVENTS);
+  const [events, setEvents] = usePersistentState('ligo:all_events_v11', INITIAL_EVENTS);
   const [profileRoot, setProfileRoot] = useState(null);
 
   useEffect(() => {
@@ -828,10 +828,13 @@ function ProfileTabV2() {
   }, []);
 
   useEffect(() => {
-    if (!events.some(e => e.hostOrganizationId === 'GPB')) return;
-    setEvents(prev => prev.map(e =>
-      e.hostOrganizationId === 'GPB' ? { ...e, hostOrganizationId: 'program_board' } : e
-    ));
+    const hasRush2 = events.some((e: any) => e.id === 'sae-rush-round-two' || (e.name && (e.name.toLowerCase().includes('wings and pool') || e.name.toLowerCase().includes('rush round two'))));
+    const hasGPB = events.some((e: any) => e.hostOrganizationId === 'GPB');
+    if (!hasRush2 && !hasGPB) return;
+    setEvents((prev: any[]) => prev
+      .filter((e: any) => e.id !== 'sae-rush-round-two' && !(e.name && (e.name.toLowerCase().includes('wings and pool') || e.name.toLowerCase().includes('rush round two'))))
+      .map((e: any) => e.hostOrganizationId === 'GPB' ? { ...e, hostOrganizationId: 'program_board' } : e)
+    );
   }, [events, setEvents]);
 
   const userOrganizations = activeUser.id === 'marcus' ? [

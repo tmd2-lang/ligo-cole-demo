@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Organization, EventItem, OrganizationMember, SIGEP_ROSTER } from '../../lib/mockEventsData';
 import { GPB_MEMBER_GROUPS, GPB_ROSTER } from '../../lib/gpbRoster';
+import { SAE_MEMBER_GROUPS, SAE_ROSTER } from '../../lib/saeRoster';
 import { USERS } from '../../lib/users';
 import { EVI } from './Icons';
 
@@ -19,6 +20,7 @@ type ClubChatMessage = {
 
 function welcomeLabel(org: Organization) {
   if (org.id === 'program_board') return 'GPB';
+  if (org.id === 'sae') return 'SAE';
   if (org.id === 'sigma_phi_epsilon') return 'SigEp';
   if (org.id === 'phantoms') return 'Phantoms';
   return org.initials || org.name;
@@ -121,6 +123,138 @@ function seedClubChat(orgId: string, currentUserId?: string): ClubChatMessage[] 
       m('Cole Brennan', 'cole', 'It works more often than you’d think.', '1:22 PM'),
       m('Jordan Davis', 'jordan', 'Team name: Fun Outdoor Thing.', '1:23 PM'),
       m('Maya Thompson', null, 'Absolutely not.', '1:24 PM'),
+    ].map(markMine);
+  }
+
+  if (orgId === 'sae') {
+    let id = 0;
+    const day = (label: string): Omit<ClubChatMessage, 'isMe'> => ({
+      id: ++id,
+      kind: 'day',
+      sender: '',
+      userId: null,
+      text: label,
+      time: '',
+    });
+    const m = (sender: string, userId: string | null, text: string, time: string): Omit<ClubChatMessage, 'isMe'> => ({
+      id: ++id,
+      kind: 'message',
+      sender,
+      userId,
+      text,
+      time,
+    });
+
+    return [
+      day('Monday'),
+      m('Cole Brennan', 'cole', 'boys quick heads up fall rush kickoff is officially thursday at 8. location is locked, Owen is sending the final rush list over today', '10:14 AM'),
+      m('Owen Marchetti', null, '^ if you sent me a name and he’s not on the sheet by tonight text me', '10:16 AM'),
+      m('Miles Thackeray', null, 'Do not text Owen asking “did you get my guy” if you never sent him the guy', '10:18 AM'),
+      m('Jasper Lowell', null, 'what if my guy is generational', '10:19 AM'),
+      m('Owen Marchetti', null, 'especially you jasper', '10:19 AM'),
+      m('Jasper Lowell', null, 'unbelievable', '10:20 AM'),
+      m('Reid Vandenberg', null, 'Also please RSVP in here when the event goes live. We’re trying to get an actual headcount instead of 17 responses and 55 people showing up.', '10:27 AM'),
+      m('Landon Pierce', null, 'sounds like a skill issue', '10:31 AM'),
+      m('Cole Brennan', 'cole', 'you showed up to the last thing with 6 people nobody knew', '10:32 AM'),
+      m('Landon Pierce', null, 'and they had a fantastic time', '10:33 AM'),
+      m('Beau Lindqvist', null, 'Brotherhood dinner moved to next Tuesday btw. Same time.', '10:41 AM'),
+      m('Rhett Donovan', null, 'where', '10:43 AM'),
+      m('Beau Lindqvist', null, 'I literally just said same time not same place 😭 sending it later', '10:43 AM'),
+      m('Miles Thackeray', null, 'Strong start to the semester everyone', '11:02 AM'),
+
+      day('Monday'),
+      m('Owen Marchetti', null, 'Rush list is at 63 right now', '4:47 PM'),
+      m('Cole Brennan', 'cole', 'how many actually coming thursday', '4:48 PM'),
+      m('Owen Marchetti', null, 'Currently 41 yes, 11 maybe, rest haven’t answered', '4:49 PM'),
+      m('Grant Ellsworth', null, '41 is plenty', '4:50 PM'),
+      m('Owen Marchetti', null, 'yeah but I want everyone responding. way easier to plan when we know', '4:51 PM'),
+      m('Callum Rhodes', null, 'who is the kid from chicago that came by last week', '4:53 PM'),
+      m('Owen Marchetti', null, 'there are like nine kids from chicago', '4:54 PM'),
+      m('Callum Rhodes', null, 'tall', '4:54 PM'),
+      m('Miles Thackeray', null, 'Solved it', '4:55 PM'),
+      m('Callum Rhodes', null, '😭', '4:55 PM'),
+      m('Owen Marchetti', null, 'text me separately', '4:56 PM'),
+
+      day('Tuesday'),
+      m('Cole Brennan', 'cole', '@everyone Fall Rush Kickoff is live. hit going or not going please', '9:08 AM'),
+      m('Kai Fitzgerald', null, 'maybe', '9:11 AM'),
+      m('Cole Brennan', 'cole', 'Kai you are a brother', '9:11 AM'),
+      m('Kai Fitzgerald', null, 'still assessing my schedule', '9:12 AM'),
+      m('Reid Vandenberg', null, 'Your schedule is the event.', '9:13 AM'),
+      m('Kai Fitzgerald', null, 'going 👍', '9:13 AM'),
+      m('Miles Thackeray', null, 'Ligo already paying dividends', '9:16 AM'),
+      m('Cole Brennan', 'cole', '😂😂😂', '9:18 AM'),
+      m('Tate Kowalczyk', null, 'Serious note please don’t send the location outside the invite list. If somebody asks you for it just send them to Owen.', '9:24 AM'),
+      m('Owen Marchetti', null, 'yes', '9:25 AM'),
+      m('Vaughn Castellano', null, 'can we bring girls or no', '9:27 AM'),
+      m('Cole Brennan', 'cole', 'not thursday', '9:28 AM'),
+      m('Vaughn Castellano', null, 'devastating', '9:28 AM'),
+      m('Miles Thackeray', null, 'You will survive 3 hours Vaughn', '9:29 AM'),
+
+      day('Tuesday'),
+      m('Grant Ellsworth', null, 'Whoever bought $286 of alcohol on the chapter card Saturday please explain yourself before I start naming names', '2:37 PM'),
+      m('Oscar Beaumont', null, 'oh brother', '2:38 PM'),
+      m('Grant Ellsworth', null, 'Oscar.', '2:38 PM'),
+      m('Oscar Beaumont', null, 'I said oh brother in solidarity', '2:39 PM'),
+      m('Grant Ellsworth', null, 'It was your card.', '2:39 PM'),
+      m('Oscar Beaumont', null, 'ah', '2:40 PM'),
+      m('Cole Brennan', 'cole', '😭😭😭', '2:40 PM'),
+      m('Reid Vandenberg', null, 'Please reimburse Grant today.', '2:41 PM'),
+      m('Oscar Beaumont', null, 'doing it rn', '2:41 PM'),
+
+      day('Tuesday'),
+      m('Beau Lindqvist', null, 'Separate thing — need 8 guys for the alumni dinner Friday. Right now I have Reid, Miles, me, Grant and Archer.', '7:03 PM'),
+      m('Archer Halloran', null, 'I never said yes', '7:04 PM'),
+      m('Beau Lindqvist', null, 'you are literally marked going', '7:04 PM'),
+      m('Archer Halloran', null, 'oh then yes', '7:05 PM'),
+      m('Miles Thackeray', null, 'This app may reveal literacy issues within the chapter', '7:05 PM'),
+      m('Dashiell Grimaldi', null, 'I can do it', '7:08 PM'),
+      m('Beau Lindqvist', null, 'perfect need 2 more', '7:09 PM'),
+      m('Rafael Domingo', null, 'I’m in', '7:11 PM'),
+      m('Niko Vittorio', null, 'same', '7:12 PM'),
+      m('Beau Lindqvist', null, 'done thank you', '7:12 PM'),
+
+      day('Wednesday'),
+      m('Owen Marchetti', null, '54 confirmed for tomorrow now. New member guys please actually talk to the rushes when they get there and don’t all stand in the kitchen with each other', '12:21 PM'),
+      m('Asher Quinlan', null, 'bro 😭', '12:23 PM'),
+      m('Elias Whitmore', null, 'we did that one time', '12:24 PM'),
+      m('Owen Marchetti', null, 'you did it the entire spring', '12:24 PM'),
+      m('Jules Bertrand', null, 'growth mindset', '12:25 PM'),
+      m('Cole Brennan', 'cole', 'Owen is right though. Spread out. Meet people.', '12:26 PM'),
+      m('Reid Vandenberg', null, 'And if someone comes who isn’t on the list, check with Owen before bringing them in. Don’t make it weird, just ask.', '12:29 PM'),
+      m('Tate Kowalczyk', null, 'thank you', '12:31 PM'),
+
+      day('Wednesday'),
+      m('Graham Sutcliffe', null, 'important question are we beating syracuse this year', '4:56 PM'),
+      m('Miles Thackeray', null, 'in what sport', '4:57 PM'),
+      m('Graham Sutcliffe', null, 'basketball obviously', '4:57 PM'),
+      m('Xavier Mbeki', null, 'no', '4:58 PM'),
+      m('Graham Sutcliffe', null, 'leave the fraternity', '4:58 PM'),
+      m('Cole Brennan', 'cole', 'Can we go one afternoon without this chat becoming ESPN', '5:00 PM'),
+      m('Xavier Mbeki', null, 'no', '5:01 PM'),
+
+      day('Thursday — Fall Rush Kickoff'),
+      m('Cole Brennan', 'cole', 'Tonight reminder: 8pm. Brothers there by 7:30 please.', '3:12 PM'),
+      m('Owen Marchetti', null, '58 confirmed', '3:13 PM'),
+      m('Miles Thackeray', null, 'That escalated quickly', '3:15 PM'),
+      m('Grant Ellsworth', null, 'Do we have enough drinks for 58 + brothers', '3:17 PM'),
+      m('Cole Brennan', 'cole', 'yes', '3:17 PM'),
+      m('Grant Ellsworth', null, 'actual yes or Cole yes', '3:18 PM'),
+      m('Cole Brennan', 'cole', '😭 actual yes', '3:18 PM'),
+      m('Tate Kowalczyk', null, 'Water is being put out too. Don’t move it.', '3:22 PM'),
+      m('Jasper Lowell', null, 'who is moving the water tate', '3:23 PM'),
+      m('Tate Kowalczyk', null, 'I know this organization', '3:23 PM'),
+
+      day('Thursday'),
+      m('Owen Marchetti', null, 'First couple guys are here already', '7:42 PM'),
+      m('Cole Brennan', 'cole', 'coming downstairs', '7:42 PM'),
+      m('Beau Lindqvist', null, 'New members get out of the kitchen', '7:43 PM'),
+      m('Asher Quinlan', null, 'BRO WE JUST GOT HERE', '7:43 PM'),
+      m('Beau Lindqvist', null, 'I’m getting ahead of it', '7:44 PM'),
+      m('Miles Thackeray', null, '😭', '7:46 PM'),
+      m('Reid Vandenberg', null, 'Have a good night boys. Meet people, be normal.', '7:49 PM'),
+      m('Vaughn Castellano', null, 'huge ask', '7:50 PM'),
+      m('Reid Vandenberg', null, 'For you specifically yes.', '7:50 PM'),
     ].map(markMine);
   }
 
@@ -491,7 +625,7 @@ export function MemberClubHome({
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px 0', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 16 }}>
             <div style={{ alignSelf: 'center', fontSize: 12, color: 'rgba(20,17,13,0.4)', fontWeight: 500, marginBottom: 8 }}>
-              Club chat · {org.name}
+              {org.id === 'sae' ? 'SAE — Brothers' : `Club chat · ${org.name}`}
             </div>
             {history.map(msg => {
               if (msg.kind === 'day') {
@@ -547,7 +681,13 @@ export function MemberClubHome({
                 value={draft}
                 onChange={e => setDraft(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') send(); }}
-                placeholder={org.id === 'program_board' ? 'Message Program Board...' : 'Message the club...'}
+                placeholder={
+                  org.id === 'sae'
+                    ? 'Message SAE — Brothers...'
+                    : org.id === 'program_board'
+                    ? 'Message Program Board...'
+                    : 'Message the club...'
+                }
                 style={{ background: 'transparent', border: 'none', outline: 'none', width: '100%', fontSize: 15, color: 'var(--ink)' }}
               />
             </div>
@@ -602,33 +742,37 @@ export function MemberClubHome({
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
                       <button
-                        onClick={() => onRsvp?.(e.id, isGoing ? null : 'going')}
+                        onClick={() => onRsvp?.(e.id, isGoing ? 'not_going' : 'going')}
                         style={{
                           flex: 1,
-                          padding: '12px 14px',
-                          borderRadius: 12,
-                          border: 'none',
-                          cursor: 'pointer',
-                          fontSize: 13,
-                          fontWeight: 600,
-                          background: isGoing ? 'var(--orange)' : 'rgba(20,17,13,0.06)',
+                          padding: '10px 14px',
+                          borderRadius: 100,
+                          border: isGoing ? 'none' : '1px solid rgba(20,17,13,0.15)',
+                          background: isGoing ? 'var(--orange)' : 'transparent',
                           color: isGoing ? '#fff' : 'var(--ink)',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
                         }}
                       >
-                        {isGoing ? "You're in" : "I'm in"}
+                        {isGoing && <EVI.Check style={{ width: 14, height: 14 }} />}
+                        {isGoing ? "I'm going" : 'Going'}
                       </button>
                       <button
-                        onClick={() => onRsvp?.(e.id, isMaybe ? null : 'maybe')}
+                        onClick={() => onRsvp?.(e.id, isMaybe ? 'not_going' : 'maybe')}
                         style={{
-                          flex: 1,
-                          padding: '12px 14px',
-                          borderRadius: 12,
-                          border: '1px solid rgba(20,17,13,0.12)',
-                          cursor: 'pointer',
-                          fontSize: 13,
-                          fontWeight: 600,
-                          background: isMaybe ? 'rgba(20,17,13,0.08)' : 'transparent',
+                          padding: '10px 18px',
+                          borderRadius: 100,
+                          border: isMaybe ? 'none' : '1px solid rgba(20,17,13,0.15)',
+                          background: isMaybe ? 'rgba(20,17,13,0.1)' : 'transparent',
                           color: 'var(--ink)',
+                          fontSize: 13,
+                          fontWeight: 500,
+                          cursor: 'pointer',
                         }}
                       >
                         Maybe
@@ -640,42 +784,38 @@ export function MemberClubHome({
             )}
           </div>
 
-          {publicHosted.length > 0 && (
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(20,17,13,0.4)', marginBottom: 18 }}>
-                Also hosting on campus
-              </div>
-              {publicHosted.map(e => (
-                <button
-                  key={e.id}
-                  onClick={() => onOpenEvent?.(e.id)}
-                  style={{
-                    display: 'flex',
-                    width: '100%',
-                    alignItems: 'center',
-                    gap: 14,
-                    padding: '0 0 18px',
-                    marginBottom: 18,
-                    border: 'none',
-                    borderBottom: '1px solid rgba(20,17,13,0.08)',
-                    background: 'none',
-                    cursor: onOpenEvent ? 'pointer' : 'default',
-                    textAlign: 'left',
-                  }}
-                >
-                  {e.image ? (
-                    <img src={e.image} alt="" style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
-                  ) : (
-                    <div style={{ width: 56, height: 56, borderRadius: 12, background: 'rgba(20,17,13,0.06)', flexShrink: 0 }} />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--ink)', marginBottom: 4 }}>{e.name}</div>
-                    <div style={{ fontSize: 13, color: 'rgba(20,17,13,0.5)', fontWeight: 500 }}>{e.day} · {e.time}</div>
-                  </div>
-                </button>
-              ))}
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(20,17,13,0.4)', marginBottom: 18 }}>
+              Open to campus · {publicHosted.length}
             </div>
-          )}
+            {publicHosted.length === 0 ? (
+              <div style={{ fontSize: 15, color: 'rgba(20,17,13,0.45)', fontWeight: 500 }}>No public events right now.</div>
+            ) : (
+              publicHosted.map(e => (
+                <div key={e.id} style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '1px solid rgba(20,17,13,0.08)' }}>
+                  {e.image && (
+                    <button
+                      onClick={() => onOpenEvent?.(e.id)}
+                      style={{ display: 'block', width: '100%', padding: 0, border: 'none', background: 'none', cursor: onOpenEvent ? 'pointer' : 'default', marginBottom: 14 }}
+                    >
+                      <img src={e.image} alt={e.name} style={{ width: '100%', aspectRatio: '16/10', objectFit: 'cover', borderRadius: 16 }} />
+                    </button>
+                  )}
+                  <div
+                    onClick={() => onOpenEvent?.(e.id)}
+                    style={{ cursor: onOpenEvent ? 'pointer' : 'default' }}
+                  >
+                    <div style={{ fontSize: 22, fontWeight: 500, fontFamily: 'var(--font-display)', color: 'var(--ink)', textTransform: 'uppercase', lineHeight: 1.05, marginBottom: 8 }}>
+                      {e.name}
+                    </div>
+                    <div style={{ fontSize: 14, color: 'rgba(20,17,13,0.55)', fontWeight: 500, marginBottom: 16 }}>
+                      {e.day}{e.time ? ` · ${e.time}` : ''}{e.venue ? ` · ${e.venue}` : ''}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
 
@@ -683,21 +823,23 @@ export function MemberClubHome({
       {screen === 'people' && (
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px 120px' }}>
           <div style={{ fontSize: 13, color: 'rgba(20,17,13,0.5)', fontWeight: 500, marginBottom: 24 }}>
-            {org.id === 'sigma_phi_epsilon'
+            {org.id === 'sigma_phi_epsilon' || org.id === 'sae'
               ? 'Brothers in the chapter — tap someone to see contact info.'
               : 'People in this organization — tap someone to see contact info.'}
           </div>
-          {org.id === 'sigma_phi_epsilon' || org.id === 'program_board' ? (
+          {org.id === 'sigma_phi_epsilon' || org.id === 'program_board' || org.id === 'sae' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
               {(org.id === 'program_board'
                 ? GPB_MEMBER_GROUPS.map(g => ({ id: g.id, title: g.title }))
+                : org.id === 'sae'
+                ? SAE_MEMBER_GROUPS.map(g => ({ id: g.id, title: g.title }))
                 : [
                     { id: 'exec-board', title: 'Exec board' },
                     { id: 'brothers', title: 'Brothers' },
                     { id: 'new-members', title: 'New members' },
                   ]
               ).map(group => {
-                const roster = org.id === 'program_board' ? GPB_ROSTER : SIGEP_ROSTER;
+                const roster = org.id === 'program_board' ? GPB_ROSTER : org.id === 'sae' ? SAE_ROSTER : SIGEP_ROSTER;
                 const members = roster.filter(m => m.subgroup === group.id && m.status === 'joined');
                 if (members.length === 0) return null;
                 return (

@@ -2,23 +2,41 @@ import type { OrganizationMember } from './mockEventsData';
 
 /** Sigma Alpha Epsilon roster — 74 members across Exec / Brothers / New Members. Alumni are reachable for invites but not listed. */
 export const SAE_ROSTER: OrganizationMember[] = [
-  // EXEC BOARD — 8
+  // EXEC BOARD — 9
   {
     org: 'sae',
     subgroup: 'exec-board',
-    name: 'Cole Brennan',
+    name: 'Bryn Lewis',
+    title: 'President',
+    email: 'bryn.lewis@georgetown.edu',
+    phone: '202-555-0301',
+    status: 'joined',
+  },
+  {
+    org: 'sae',
+    subgroup: 'exec-board',
+    name: 'Kahn Ho',
     title: 'Social Chair',
-    email: 'cole.brennan@georgetown.edu',
+    email: 'kahn.ho@georgetown.edu',
     phone: '202-555-0105',
     status: 'joined',
   },
   {
     org: 'sae',
     subgroup: 'exec-board',
-    name: 'Reid Vandenberg',
-    title: 'President',
-    email: 'reid.vandenberg@georgetown.edu',
-    phone: '202-555-0301',
+    name: 'Jack Saunders',
+    title: 'Social Chair',
+    email: 'jack.saunders@georgetown.edu',
+    phone: '202-555-0106',
+    status: 'joined',
+  },
+  {
+    org: 'sae',
+    subgroup: 'exec-board',
+    name: 'Brian Gross',
+    title: 'Social Chair',
+    email: 'brian.gross@georgetown.edu',
+    phone: '202-555-0107',
     status: 'joined',
   },
   {

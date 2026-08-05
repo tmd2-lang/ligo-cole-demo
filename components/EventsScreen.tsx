@@ -53,7 +53,7 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
   // Keep mock data as-is for Charlotte to see the new fixture events
   const dynamicInitialEvents = INITIAL_EVENTS;
 
-  const [events, setEvents] = usePersistentState<EventItem[]>('ligo:all_events_v6', dynamicInitialEvents);
+  const [events, setEvents] = usePersistentState<EventItem[]>('ligo:all_events_v11', dynamicInitialEvents);
   const [rsvpStore, setRsvpStore] = usePersistentState<UserRsvpStore>('ligo:user_rsvps_v1', {});
   const [view, setView] = useState<EventsView>("main");
   const [mainTab, setMainTab] = useState<MainTab>('home');
@@ -84,9 +84,14 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
   React.useEffect(() => {
     const kickoffCopy =
       'Join the full Georgetown Program Board for our fall programming kickoff. We’ll walk through the semester calendar, assign initial event teams, review production timelines, and cover expectations for Programming, Marketing, and Production. Dinner will be provided, and all members should arrive ready to choose at least one September or October event to support.';
-    const byId = new Map(INITIAL_EVENTS.map(e => [String(e.id), e]));
+    const byId = new Map([...INITIAL_EVENTS, ...GPB_SEED_EVENTS, ...SAE_SEED_EVENTS].map(e => [String(e.id), e]));
 
-    const needsFix = events.some(e => {
+    const hasDeletedEvents = events.some(e =>
+      e.id === 'sae-rush-round-two'
+      || (e.name && (e.name.toLowerCase().includes('wings and pool') || e.name.toLowerCase().includes('rush round two')))
+    );
+
+    const needsFix = hasDeletedEvents || events.some(e => {
       const source = byId.get(String(e.id));
       if (typeof e.image === 'string' && e.image.includes('/posh/')) return true;
       if (e.hostOrganizationId === 'GPB') return true;
@@ -105,7 +110,11 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
     if (!needsFix && missingSeeds.length === 0) return;
 
     setEvents(prev => {
-      const fixed = prev.map(e => {
+      const cleaned = prev.filter(e =>
+        e.id !== 'sae-rush-round-two'
+        && !(e.name && (e.name.toLowerCase().includes('wings and pool') || e.name.toLowerCase().includes('rush round two')))
+      );
+      const fixed = cleaned.map(e => {
         const source = byId.get(String(e.id));
         const normalized =
           typeof e.image === 'string' ? e.image.replace(/\/posh\//g, '/Posh/') : e.image;
@@ -624,7 +633,7 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
 
       {sheetOpen && (
         <CreateEventSheet 
-          club={MOCK_ORGANIZATIONS[activeUser.organizations.find((o: any) => ['officer', 'social_chair', 'admin'].includes(o.role))?.organizationId || 'phantoms']} 
+          club={MOCK_ORGANIZATIONS[activeOrgId || activeUser.organizations.find((o: any) => ['officer', 'social_chair', 'admin'].includes(o.role))?.organizationId || 'sae']} 
           currentUserId={activeUser.id}
           onClose={() => setSheetOpen(false)} 
           onPublish={handlePublish} 

@@ -463,6 +463,7 @@ export function PoshMobileEventEditor() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', overflowY: 'auto', maxHeight: '400px', padding: '4px' }}>
               {[
+                '/Posh/SAEFallRush.png',
                 '/Posh/MayaJune.png',
                 '/Posh/Saxatones.png',
                 '/Posh/Boxing.png',

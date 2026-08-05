@@ -15,10 +15,43 @@ export type GoingSocial = {
   connectionsLabel: string;
 };
 
-const DEMO_FACE_POOL = ['sofia', 'charlotte', 'caroline', 'maddie', 'alessia', 'bennett', 'cole', 'jordan', 'marcus'] as const;
+const MALE_DEMO_FACE_POOL = ['cole', 'bennett', 'jordan', 'marcus'] as const;
+const ALL_DEMO_FACE_POOL = ['sofia', 'charlotte', 'caroline', 'maddie', 'alessia', 'bennett', 'cole', 'jordan', 'marcus'] as const;
 
 function shortFirst(name: string) {
   return name.split(' ')[0].replace(/\.$/, '');
+}
+
+function isFraternityRushEvent(event: EventItem): boolean {
+  const name = (event.name || '').toLowerCase();
+  const host = (event.host || event.hostName || '').toLowerCase();
+  const orgId = (event.hostOrganizationId || '').toLowerCase();
+  const tags = (event.tags || []).map(t => t.toLowerCase());
+  const category = (event.category || '').toLowerCase();
+  const summary = (event.summary || event.description || '').toString().toLowerCase();
+
+  // Events with dates / open campus / formals allow girl profiles
+  if (name.includes('formal') || name.includes('white party') || tags.includes('brothers + dates')) {
+    return false;
+  }
+
+  const isFrat = orgId === 'sae' || 
+    orgId === 'sigma_phi_epsilon' || 
+    host.includes('sae') || 
+    host.includes('sigma alpha epsilon') || 
+    host.includes('sigep') || 
+    host.includes('sigma phi epsilon');
+
+  const isRush = name.includes('rush') || 
+    name.includes('shackles') || 
+    tags.includes('rush') || 
+    tags.includes('recruitment') ||
+    category.includes('rush') || 
+    summary.includes('rush') ||
+    summary.includes('recruitment') ||
+    summary.includes('prospective member');
+
+  return isFrat && isRush;
 }
 
 /** Stable, authentic faces + honest counts. Never inflate attendance. */
@@ -31,7 +64,8 @@ export function getGoingSocial(event: EventItem, currentUserId?: string): GoingS
   );
 
   const seed = String(event.id).split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  const pool = DEMO_FACE_POOL.filter(id => id !== currentUserId && USERS[id]?.avatar);
+  const poolBase = isFraternityRushEvent(event) ? MALE_DEMO_FACE_POOL : ALL_DEMO_FACE_POOL;
+  const pool = poolBase.filter(id => id !== currentUserId && USERS[id]?.avatar);
   const faces: GoingFace[] = pool.length === 0
     ? []
     : [...pool.slice(seed % pool.length), ...pool.slice(0, seed % pool.length)]

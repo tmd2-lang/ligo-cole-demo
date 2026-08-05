@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useMemo, useRef } from "react";
-import { INITIAL_EVENTS, MOCK_ORGANIZATIONS, EventItem, MockUser, GPB_SEED_EVENTS } from "../lib/mockEventsData";
+import { INITIAL_EVENTS, MOCK_ORGANIZATIONS, EventItem, MockUser, GPB_SEED_EVENTS, SAE_SEED_EVENTS } from "../lib/mockEventsData";
 import { setUserRsvp, withResolvedStatuses, type UserRsvpStore } from "../lib/eventRsvps";
 import { HomeFeedView } from "./events/HomeFeedView";
 import { InvitesView } from "./events/InvitesView";
@@ -100,7 +100,8 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
       if (e.summary && !e.description) return true;
       return false;
     });
-    const missingSeeds = GPB_SEED_EVENTS.filter(seed => !events.some(e => e.id === seed.id));
+    const allSeeds = [...GPB_SEED_EVENTS, ...SAE_SEED_EVENTS];
+    const missingSeeds = allSeeds.filter(seed => !events.some(e => e.id === seed.id));
     if (!needsFix && missingSeeds.length === 0) return;
 
     setEvents(prev => {
@@ -140,7 +141,7 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
           hostOrganizationId,
         };
       });
-      const stillMissing = GPB_SEED_EVENTS.filter(seed => !fixed.some(e => e.id === seed.id));
+      const stillMissing = allSeeds.filter(seed => !fixed.some(e => e.id === seed.id));
       return stillMissing.length ? [...fixed, ...stillMissing] : fixed;
     });
   }, [events, setEvents]);

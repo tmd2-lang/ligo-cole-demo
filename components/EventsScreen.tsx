@@ -16,12 +16,13 @@ import { EVI } from "./events/Icons";
 import { usePersistentState } from "../lib/usePersistentState";
 
 type EventsView = "main" | "organization" | "member-club" | "manage-event" | "event-detail" | "publish-confirmation";
-type MainTab = 'home' | 'invites' | 'clubs';
+type MainTab = 'home' | 'invites' | 'clubs' | 'manage';
 
 /** Demo users who belong to each org — used when publishing members-only invites */
 const DEMO_ORG_MEMBERS: Record<string, string[]> = {
   program_board: ['cole', 'jordan'],
   sigma_phi_epsilon: ['marcus', 'jordan', 'bennett', 'cole'],
+  sae: ['cole'],
   phantoms: ['sofia'],
 };
 
@@ -39,7 +40,8 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
     ] : activeUserId === 'sofia' ? [
       { organizationId: 'phantoms', role: 'admin', groupIds: ['g1', 'g2'] }
     ] : activeUserId === 'cole' ? [
-      { organizationId: 'program_board', role: 'admin', groupIds: ['g-all-gpb', 'g-exec-gpb', 'g-programming-gpb'] }
+      { organizationId: 'program_board', role: 'admin', groupIds: ['g-all-gpb', 'g-exec-gpb', 'g-programming-gpb'] },
+      { organizationId: 'sae', role: 'social_chair', groupIds: ['g-all-sae', 'g-exec-sae'] }
     ] : activeUserId === 'jordan' ? [
       { organizationId: 'sigma_phi_epsilon', role: 'member', groupIds: ['g-all-spe'] },
       { organizationId: 'program_board', role: 'member', groupIds: ['g-all-gpb', 'g-production-gpb'] }
@@ -278,10 +280,11 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
     ? viewEvents.find(e => String(e.id) === liveActivityEventId && (e.currentUserStatus === 'going' || e.currentUserStatus === 'hosting'))
     : null;
 
-  const managedOrgs = activeUser.organizations
+  const managedOrgEntries = activeUser.organizations
     .filter((o: any) => ['officer', 'social_chair', 'admin'].includes(o.role))
-    .map((o: any) => MOCK_ORGANIZATIONS[o.organizationId])
-    .filter(Boolean);
+    .map((o: any) => ({ org: MOCK_ORGANIZATIONS[o.organizationId], role: o.role }))
+    .filter((o: any) => o.org);
+  const managedOrgs = managedOrgEntries.map((o: any) => o.org);
   const isAdmin = managedOrgs.length > 0;
   const memberOrgs = activeUser.organizations
     .map((o: any) => ({
@@ -374,12 +377,18 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
               {isAdmin && (
                 <button 
                   onClick={() => {
-                    setActiveOrgId(managedOrgs[0].id);
-                    setSkipOrgWelcome(false);
-                    setView('organization');
+                    // One org goes straight to its workspace; several need a pick first.
+                    if (managedOrgs.length === 1) {
+                      setActiveOrgId(managedOrgs[0].id);
+                      setSkipOrgWelcome(false);
+                      setView('organization');
+                    } else {
+                      setMainTab('manage');
+                    }
                   }} 
-                  style={{ paddingBottom: 16, fontSize: 15, fontWeight: 500, color: 'rgba(20,17,13,0.4)', background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
+                  style={{ paddingBottom: 16, fontSize: 15, fontWeight: 500, color: mainTab === 'manage' ? 'var(--ink)' : 'rgba(20,17,13,0.4)', background: 'none', border: 'none', cursor: 'pointer', position: 'relative' }}>
                   Manage
+                  {mainTab === 'manage' && <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, height: 2, background: 'var(--ink)', borderRadius: 2 }} />}
                 </button>
               )}
             </div>
@@ -444,6 +453,52 @@ export function EventsScreen({ onTab, overrideUserId }: { onTab?: any, overrideU
                       <EVI.Chevron style={{ width: 16, height: 16, color: 'rgba(20,17,13,0.3)', transform: 'rotate(-90deg)' }} />
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {mainTab === 'manage' && (
+              <div className="screen-fade" style={{ padding: '8px 20px 120px' }}>
+                <div style={{ fontSize: 13, color: 'rgba(20,17,13,0.5)', fontWeight: 500, marginBottom: 20, marginTop: 8 }}>
+                  Organizations you run
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {managedOrgEntries.map(({ org, role }: any) => {
+                    const roleLabel = String(role).replace('_', ' ');
+                    return (
+                      <button
+                        key={org.id}
+                        onClick={() => {
+                          setActiveOrgId(org.id);
+                          setSkipOrgWelcome(false);
+                          setView('organization');
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 16,
+                          padding: 16,
+                          background: '#fff',
+                          borderRadius: 20,
+                          boxShadow: '0 4px 16px rgba(20,17,13,0.04)',
+                          border: '1px solid rgba(20,17,13,0.06)',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        <div style={{ width: 48, height: 48, borderRadius: 12, background: '#14110D', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, letterSpacing: '0.04em', flexShrink: 0 }}>
+                          {org.initials}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 16, fontWeight: 600, color: '#14110D' }}>{org.name}</div>
+                          <div style={{ fontSize: 14, color: 'rgba(20,17,13,0.5)', marginTop: 2 }}>
+                            <span style={{ textTransform: 'capitalize' }}>{roleLabel}</span> · {org.memberCount} members
+                          </div>
+                        </div>
+                        <EVI.Chevron style={{ width: 16, height: 16, color: 'rgba(20,17,13,0.3)', transform: 'rotate(-90deg)' }} />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

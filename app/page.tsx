@@ -1,4 +1,4 @@
-/* Cole-only demo — Events only, locked to Cole Brennan (GPB admin). */
+/* Cole-only demo — Events only, locked to Cole Brennan (GPB admin, SAE social chair). */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -65,7 +65,7 @@ export default function ColeDemo() {
             background: "rgba(255,255,255,0.25)",
           }}
         />
-        Demo · Cole · GPB admin
+        Demo · Cole · GPB + SAE admin
       </div>
 
       <IOSDevice width={402} height={874} dark={false}>
@@ -113,7 +113,7 @@ export default function ColeDemo() {
           lineHeight: 1.5,
         }}
       >
-        Locked to <strong style={{ color: "rgba(255,255,255,0.55)" }}>Cole Brennan</strong> — Georgetown Program Board admin.
+        Locked to <strong style={{ color: "rgba(255,255,255,0.55)" }}>Cole Brennan</strong> — Georgetown Program Board admin and SAE social chair.
         <br />
         Use Manage to create events, invite members, and run event ops.
       </div>

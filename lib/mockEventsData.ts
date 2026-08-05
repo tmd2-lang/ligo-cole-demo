@@ -225,6 +225,22 @@ export const MOCK_ORGANIZATIONS: Record<string, Organization> = {
       { id: 'g-production-gpb', name: 'Production', memberCount: 14, memberIds: [] },
     ],
   },
+  sae: {
+    id: 'sae',
+    name: 'Sigma Alpha Epsilon',
+    initials: 'SAE',
+    campus: 'georgetown',
+    category: 'Fraternity',
+    memberCount: 74,
+    currentUserRole: 'social_chair',
+    groups: [
+      { id: 'g-all-sae', name: 'All Members', memberCount: 74, memberIds: [] },
+      { id: 'g-exec-sae', name: 'Exec Board', memberCount: 8, memberIds: [] },
+      { id: 'g-bros-sae', name: 'Brothers', memberCount: 52, memberIds: [] },
+      { id: 'g-new-sae', name: 'New Members', memberCount: 14, memberIds: [] },
+      { id: 'g-alum-sae', name: 'Alumni', memberCount: 180, memberIds: [] },
+    ],
+  },
 };
 
 const ev = (

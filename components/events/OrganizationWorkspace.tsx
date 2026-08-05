@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Organization, EventItem, OrganizationMember, SIGEP_ROSTER } from '../../lib/mockEventsData';
 import { GPB_MEMBER_GROUPS, GPB_ROSTER } from '../../lib/gpbRoster';
+import { SAE_MEMBER_GROUPS, SAE_ROSTER } from '../../lib/saeRoster';
 import { USERS } from '../../lib/users';
 import { EVI } from './Icons';
 
 function welcomeLabel(org: Organization) {
   if (org.id === 'program_board') return 'GPB';
   if (org.id === 'sigma_phi_epsilon') return 'SigEp';
+  if (org.id === 'sae') return 'SAE';
   if (org.id === 'phantoms') return 'Phantoms';
   return org.initials || org.name;
 }
@@ -223,7 +225,7 @@ export function OrganizationWorkspace({
             <div style={{ fontSize: 12, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.45)', marginBottom: 12 }}>
               {org.id === 'program_board'
                 ? 'Running the board'
-                : org.id === 'sigma_phi_epsilon'
+                : org.id === 'sigma_phi_epsilon' || org.id === 'sae'
                   ? 'Running the chapter'
                   : 'Organizer'}
             </div>
@@ -396,6 +398,23 @@ export function OrganizationWorkspace({
                 onSelect={setSelectedMember}
                 currentUserId={currentUserId}
               />
+            ) : org.id === 'sae' ? (
+              <>
+                <RosterMembersList
+                  roster={SAE_ROSTER}
+                  groups={[...SAE_MEMBER_GROUPS]}
+                  onSelect={setSelectedMember}
+                  currentUserId={currentUserId}
+                />
+                <div style={{ marginTop: 32 }}>
+                  <div style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(20,17,13,0.4)', marginBottom: 8 }}>
+                    ALUMNI · 180
+                  </div>
+                  <div style={{ fontSize: 14, color: 'rgba(20,17,13,0.5)', fontWeight: 500 }}>
+                    Reachable for invites · not shown here.
+                  </div>
+                </div>
+              </>
             ) : (
               <div>
                 {org.groups.filter(g => g.name !== 'All Members').map(g => (
